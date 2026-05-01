@@ -1,0 +1,29 @@
+[project]
+name = "phoneme-server"
+version = "0.1.0"
+description = "Phoneme recognition + GOP-SF mispronunciation feedback sidecar for flashcards-again"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "torch>=2.4",
+  "torchaudio>=2.4",
+  "transformers>=4.46",
+  "phonemizer>=3.3",
+  "soundfile>=0.12",
+  "numpy>=2.0",
+  "python-multipart>=0.0.20",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27"]
+phoneticxeus = [
+  "huggingface_hub>=0.26",
+]
+
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]

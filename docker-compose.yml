@@ -1,0 +1,48 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flashcards-again-app:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - PHONEME_SERVER_URL=http://phoneme-server:8000
+    depends_on:
+      phoneme-server:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    networks:
+      - internal
+
+  phoneme-server:
+    build:
+      context: ./phoneme-server
+      dockerfile: Dockerfile
+    image: flashcards-again-phoneme:latest
+    restart: unless-stopped
+    environment:
+      - PHONEME_BACKEND=${PHONEME_BACKEND:-wav2vec2phoneme}
+      - HF_HOME=/cache/huggingface
+    volumes:
+      - phoneme_cache:/cache/huggingface
+    networks:
+      - internal
+    # Phoneme model weights download on first request (~1GB) so the warm-up
+    # startup window is generous.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  phoneme_cache:
